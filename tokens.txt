@@ -1,0 +1,11 @@
+Access-Token:
+1035676027-kBiem3UOVUg093irulINLfSIPBg9DKnkWzES0vz
+
+Access Token Secret:
+sn7yv4tnTGnTQLKPugY2arrnwm8xxIC16k6smLqO7YoA4
+
+API Key:
+61qV0OFGhRtDH0qnHFDsd35Zh
+
+API Key Secret:
+sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT

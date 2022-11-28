@@ -3,6 +3,7 @@ import tweepy
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from pick import pick
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
@@ -16,7 +17,8 @@ auth.set_access_token(access_key, access_secret)
 client = tweepy.API(auth)
 
 
-def printResults(keyword, numberOfTweets, polarity, collectedTweets):
+def printResults(keyword, numberOfTweets, collectedTweets):
+    polarity = sum(collectedTweets['sentiment'])/numberOfTweets
     print("How people are reacting on " + keyword + " by analyzing " + str(numberOfTweets) + " Tweets.")
     print("=====================================================================================================")
     sentimentResult = ""
@@ -54,7 +56,10 @@ def printResults(keyword, numberOfTweets, polarity, collectedTweets):
     # Top 10 Users with most Tweets
     users = collectedTweets['username'].value_counts()[:10]
     print("Top 10 Users with most Tweets: \n{}. \n".format(users))
+
+
     
+
 
 
 def scrape(keyword, numberOfTweets):
@@ -120,6 +125,5 @@ numberOfTweets = int(input ("Enter how many tweets to analyze: "))
 
 collectedTweets = scrape(keyword, numberOfTweets)
 
-polarity = sum(collectedTweets['sentiment'])/numberOfTweets
-printResults(keyword, numberOfTweets, polarity, collectedTweets)
+printResults(keyword, numberOfTweets, collectedTweets)
 

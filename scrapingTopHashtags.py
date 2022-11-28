@@ -93,27 +93,25 @@ def scrape(words, date_since, numtweet):
 		# we will save our database as a CSV file.
 		db.to_csv(filename)
 
-if __name__ == '__main__':
-
-		# Enter your own credentials obtained
-		# from your developer account
-		consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
-		consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
-		access_key = "1035676027-kBiem3UOVUg093irulINLfSIPBg9DKnkWzES0vz"
-		access_secret = "sn7yv4tnTGnTQLKPugY2arrnwm8xxIC16k6smLqO7YoA4"
+# Enter your own credentials obtained
+# from your developer account
+consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
+consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
+access_key = "1035676027-kBiem3UOVUg093irulINLfSIPBg9DKnkWzES0vz"
+access_secret = "sn7yv4tnTGnTQLKPugY2arrnwm8xxIC16k6smLqO7YoA4"
 
 
-		auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-		auth.set_access_token(access_key, access_secret)
-		api = tweepy.API(auth)
+auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+auth.set_access_token(access_key, access_secret)
+api = tweepy.API(auth)
 
-		# Enter Hashtag and initial date
-		print("Enter Twitter HashTag to search for")
-		words = input()
-		print("Enter Date since The Tweets are required in yyyy-mm--dd")
-		date_since = input()
+# Enter Hashtag and initial date
+print("Enter Twitter HashTag to search for")
+words = input()
+print("Enter Date since The Tweets are required in yyyy-mm--dd")
+date_since = input()
 
-		# number of tweets you want to extract in one run
-		numtweet = 100
-		scrape(words, date_since, numtweet)
-		print('Scraping has completed!')
+# number of tweets you want to extract in one run
+numtweet = 100
+scrape(words, date_since, numtweet)
+print('Scraping has completed!')

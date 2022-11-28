@@ -36,7 +36,6 @@ for tweet in tweepy.Paginator(client.search_recent_tweets, query=keyword,
  neg = score['neg']
  neu = score['neu']
  pos = score['pos']
- comp = score['compound']
  polarity += analysis.sentiment.polarity
  
  if neg > pos:
@@ -63,6 +62,14 @@ neutral = format(neutral, '.1f')
 neutral_list = pd.DataFrame(neutral_list)
 negative_list = pd.DataFrame(negative_list)
 positive_list = pd.DataFrame(positive_list)
+print("How people are reacting on " + keyword + " by analyzing " + str(noOfTweet) + " Tweets.")
+if (polarity == 0):
+   print("--> Neutral")
+elif (polarity < 0.00):
+   print("--> Negative")
+elif (polarity > 0.00):
+   print("--> Positive")
+print("polarity: " + str(polarity))
 print("total number: ",len(tweet_list))
 print("positive number: ",len(positive_list))
 print("negative number: ", len(negative_list))

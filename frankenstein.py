@@ -6,6 +6,7 @@ import numpy as np
 from pick import pick
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import webbrowser
 
 consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
 consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
@@ -58,19 +59,20 @@ def printResults(keyword, numberOfTweets, collectedTweets):
     print("Top 10 Users with most Tweets: \n{}. \n".format(user))
 
     # User with most Tweets
-    username = str(user[:1].index[0])
-    userWithMostTweets = client.get_user(screen_name = username)
+    screen_name = str(user[:1].index[0])
+    userWithMostTweets = client.get_user(screen_name = screen_name)
     print("User with most Tweets in this Dataset: \n{}.".format(userWithMostTweets.name))
     print("He has {} followers".format(userWithMostTweets.followers_count))
-    list = client.get_followers(screen_name = username)[:10]
+    list = client.get_followers(screen_name = screen_name)[:10]
 
-        # Creating DataFrame using pandas
-    df = pd.DataFrame(columns=['username',
-                                            'description',
-                                            'location',
-                                            'following',
-                                            'followers',
-                                            'totaltweets',])
+    # Creating DataFrame using pandas
+    df = pd.DataFrame(columns=[ 'username',
+                                'description',
+                                'location',
+                                'following',
+                                'followers',
+                                'totaltweets',])
+
     # create Dataframe with data from list
     for user in list:
         username = user.screen_name
@@ -87,9 +89,14 @@ def printResults(keyword, numberOfTweets, collectedTweets):
 
 
     print("10 of his followers are: \n{}.".format(df[['username', 'description', 'location', 'following', 'followers', 'totaltweets']]))
+    baseUrl = 'https://twitter.com/'
+    followersEnding = '/followers'
+    url = baseUrl + screen_name + followersEnding
+    print(url)
+    webbrowser.open(url)
 
 
-def scrape(keyword, numberOfTweets):
+def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
 
     # Creating DataFrame using pandas
     collectedTweets = pd.DataFrame(columns=['username',
@@ -105,7 +112,8 @@ def scrape(keyword, numberOfTweets):
     # Collecting tweets using tweepy
     tweets = tweepy.Cursor(client.search_tweets,
                                 keyword, lang="en",
-                                tweet_mode='extended').items(numberOfTweets)
+                                tweet_mode='extended',
+                                since_id=sinceDate).items(numberOfTweets)
 
     # .Cursor() returns an iterable object. Each item in
     # the iterator has various attributes
@@ -149,8 +157,9 @@ def scrape(keyword, numberOfTweets):
 
 keyword = input("Enter keyword/hashtag to search about: ")
 numberOfTweets = int(input ("Enter how many tweets to analyze: "))
+sinceDate = input("Enter since date (yyyy-mm-dd): ")
 
-collectedTweets = scrape(keyword, numberOfTweets)
-
+collectedTweets = scrape(keyword, numberOfTweets, sinceDate)
+collectedTweets.to_csv('tweets.csv')
 printResults(keyword, numberOfTweets, collectedTweets)
 

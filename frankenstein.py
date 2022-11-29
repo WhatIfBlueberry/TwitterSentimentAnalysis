@@ -54,12 +54,39 @@ def printResults(keyword, numberOfTweets, collectedTweets):
     print("Top 10 most frequent hashtags: \n{}. \n".format(hashtags))
 
     # Top 10 Users with most Tweets
-    users = collectedTweets['username'].value_counts()[:10]
-    print("Top 10 Users with most Tweets: \n{}. \n".format(users))
+    user = collectedTweets['username'].value_counts()[:10]
+    print("Top 10 Users with most Tweets: \n{}. \n".format(user))
+
+    # User with most Tweets
+    username = str(user[:1].index[0])
+    userWithMostTweets = client.get_user(screen_name = username)
+    print("User with most Tweets in this Dataset: \n{}.".format(userWithMostTweets.name))
+    print("He has {} followers".format(userWithMostTweets.followers_count))
+    list = client.get_followers(screen_name = username)[:10]
+
+        # Creating DataFrame using pandas
+    df = pd.DataFrame(columns=['username',
+                                            'description',
+                                            'location',
+                                            'following',
+                                            'followers',
+                                            'totaltweets',])
+    # create Dataframe with data from list
+    for user in list:
+        username = user.screen_name
+        description = user.description
+        location = user.location
+        following = user.friends_count
+        followers = user.followers_count
+        totaltweets = user.statuses_count
+
+        ith_tweet = [username, description,
+                    location, following,
+                    followers, totaltweets]
+        df.loc[len(df)] = ith_tweet
 
 
-    
-
+    print("10 of his followers are: \n{}.".format(df[['username', 'description', 'location', 'following', 'followers', 'totaltweets']]))
 
 
 def scrape(keyword, numberOfTweets):

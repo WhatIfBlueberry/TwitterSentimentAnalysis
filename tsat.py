@@ -156,6 +156,9 @@ def mainMenu():
 def printTop10Hashtags():
     hashtags = collectedTweets['hashtags'].value_counts()[:10]
     print("Top 10 most frequent hashtags: \n{}. \n".format(hashtags))
+    input("Press Enter to continue...")
+    os.system('clear')
+    mainMenu()
 
 def printTop10Users():
     title = 'Select User to Inspect'
@@ -182,8 +185,12 @@ def userActions(selectedUser):
         followersEnding = '/followers'
         url = baseUrl + selectedUser + followersEnding
         webbrowser.open(url)
+        os.system('clear')
+        userActions(selectedUser)
     elif (option[0] == 'Show User Profile (Browser)'):
         webbrowser.open(baseUrl + selectedUser)
+        os.system('clear')
+        userActions(selectedUser)
     elif (option[0] == 'Show User Information'):
         tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]
         os.system('clear')
@@ -208,6 +215,7 @@ def showTweetText(selectedUser):
         tweetId = tweets['id'].iloc[options[1]]
         url = 'https://twitter.com/' + selectedUser + '/status/' + str(tweetId)
         webbrowser.open(url)
+        os.system('clear')
     userActions(selectedUser)
 
 ## Main

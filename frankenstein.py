@@ -7,6 +7,7 @@ from pick import pick
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import webbrowser
+import os
 
 consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
 consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
@@ -18,9 +19,13 @@ auth.set_access_token(access_key, access_secret)
 client = tweepy.API(auth)
 
 
-def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
+def query():
+    os.system('clear')
+    keyword = input("Enter keyword/hashtag to search about: ")
+    numberOfTweets = int(input ("Enter how many tweets to analyze: "))
+    sinceDate = input("Enter since date (yyyy-mm-dd): ")
 
-    # Creating DataFrame using pandas
+    global collectedTweets
     collectedTweets = pd.DataFrame(columns=['username',
                                             'description',
                                             'location',
@@ -30,7 +35,19 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
                                             'retweetcount',
                                             'text',
                                             'hashtags',
+                                            'id',
                                             'sentiment'])
+    collectedTweets = scrape(keyword, numberOfTweets, sinceDate)
+    collectedTweets.to_csv('tweets.csv')
+
+    mainMenu()
+
+
+def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
+
+    # Creating DataFrame using pandas
+    collectedTweets.drop(collectedTweets.index, axis=0, inplace=True)
+    
     # Collecting tweets using tweepy
     tweets = tweepy.Cursor(client.search_tweets,
                                 keyword, lang="en",
@@ -57,6 +74,7 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
         totaltweets = tweet.user.statuses_count
         retweetcount = tweet.retweet_count
         hashtags = tweet.entities['hashtags']
+        id = tweet.id
         sentiment = analysis.sentiment.polarity
 
         try:
@@ -71,7 +89,7 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
         ith_tweet = [username, description,
                     location, following,
                     followers, totaltweets,
-                    retweetcount, text, hashtext, sentiment]
+                    retweetcount, text, hashtext, id, sentiment]
         collectedTweets.loc[len(collectedTweets)] = ith_tweet
     
     return collectedTweets
@@ -110,7 +128,7 @@ def printSummary():
 
 def mainMenu():
     title = 'Please choose which Information you want to see: '
-    options =['Top 10 most frequent hashtags', 'Top 10 Users with most Tweets', 'Summary', 'Exit']
+    options =['Top 10 most frequent hashtags', 'Top 10 Users with most Tweets', 'Summary', 'Enter new Query', 'Exit']
     option = pick(options, title)
 
     if (option[0] == 'Top 10 most frequent hashtags'):
@@ -119,6 +137,8 @@ def mainMenu():
         printTop10Users()
     elif (option[0] == 'Summary'):
         printSummary()
+    elif (option[0] == 'Enter new Query'):
+        query()
     elif (option[0] == 'Exit'):
         print("Goodbye!")
         exit();
@@ -146,9 +166,8 @@ def printTop10Users():
 def userActions(selectedUser):
     baseUrl = 'https://twitter.com/'
     user = client.get_user(screen_name = selectedUser)
-    followers = user.followers_count
-    title = 'User ' + selectedUser + ' has ' + str(followers) + ' followers' +'\nPlease choose what you want to do: '
-    options =['Show Followers', 'Show User Profile', 'Show Tweet', 'Show Tweet in Browser', 'Return to User Selection']
+    title = 'User: ' + selectedUser + '\nPlease choose what you want to do: '
+    options =['Show Followers', 'Show User Profile', 'Show User Information', 'Show Tweet(s)', 'Return to User Selection']
     option = pick(options, title)
     if (option[0] == 'Show Followers'):
         followersEnding = '/followers'
@@ -156,12 +175,18 @@ def userActions(selectedUser):
         webbrowser.open(url)
     elif (option[0] == 'Show User Profile'):
         webbrowser.open(baseUrl + selectedUser)
-    elif (option[0] == 'Show Tweet'):
+    elif (option[0] == 'Show User Information'):
+        tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]
+        os.system('clear')
+        print(tweets)
+        input("Press Enter to return...")
+        userActions(selectedUser)
+    elif (option[0] == 'Show Tweet(s)'):
         showTweetText(selectedUser)
-    elif (option[0] == 'Show Tweet in Browser'):
-        tweets = client.user_timeline(screen_name = selectedUser, count = 1)
-        for tweet in tweets:
-            url = baseUrl + selectedUser + '/status/' + str(tweet.id)
+        tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]
+        print(tweets)
+        for i in range(len(tweets)):
+            url = baseUrl + selectedUser + '/status/' + str(tweets.loc[i, 'id'])
             webbrowser.open(url)
     elif (option[0] == 'Return to User Selection'):
         printTop10Users()
@@ -172,59 +197,12 @@ def showTweetText(selectedUser):
     for tweet in tweets:
         parsedTweet = tweet.replace('\n', '\n')
         options.append((parsedTweet, True))
-    title = 'Tweet(s). Press enter to return to User Selection'
+    title = 'Tweet(s). Press enter to return to User Actions'
     pick(options, title)
     userActions(selectedUser)
 
-   # print("Top 10 Users with most Tweets: \n{}. \n".format(users))
+
+
 ## Main
 
-keyword = input("Enter keyword/hashtag to search about: ")
-numberOfTweets = int(input ("Enter how many tweets to analyze: "))
-sinceDate = input("Enter since date (yyyy-mm-dd): ")
-
-collectedTweets = scrape(keyword, numberOfTweets, sinceDate)
-collectedTweets.to_csv('tweets.csv')
-
-mainMenu()
-
-
-
-# # User with most Tweets
-# screen_name = str(user[:1].index[0])
-# userWithMostTweets = client.get_user(screen_name = screen_name)
-# print("User with most Tweets in this Dataset: \n{}.".format(userWithMostTweets.name))
-# print("He has {} followers".format(userWithMostTweets.followers_count))
-# list = client.get_followers(screen_name = screen_name)[:10]
-
-# # Creating DataFrame using pandas
-# df = pd.DataFrame(columns=[ 'username',
-#                             'description',
-#                             'location',
-#                             'following',
-#                             'followers',
-#                             'totaltweets',])
-
-# # create Dataframe with data from list
-# for user in list:
-#     username = user.screen_name
-#     description = user.description
-#     location = user.location
-#     following = user.friends_count
-#     followers = user.followers_count
-#     totaltweets = user.statuses_count
-
-#     ith_tweet = [username, description,
-#                 location, following,
-#                 followers, totaltweets]
-#     df.loc[len(df)] = ith_tweet
-
-
-# print("10 of his followers are: \n{}.".format(df[['username', 'description', 'location', 'following', 'followers', 'totaltweets']]))
-# baseUrl = 'https://twitter.com/'
-# followersEnding = '/followers'
-# url = baseUrl + screen_name + followersEnding
-# print(url)
-# webbrowser.open(url)
-
-
+query()

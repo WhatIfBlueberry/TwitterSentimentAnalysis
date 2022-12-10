@@ -167,41 +167,39 @@ def userActions(selectedUser):
     baseUrl = 'https://twitter.com/'
     user = client.get_user(screen_name = selectedUser)
     title = 'User: ' + selectedUser + '\nPlease choose what you want to do: '
-    options =['Show Followers', 'Show User Profile', 'Show User Information', 'Show Tweet(s)', 'Return to User Selection']
+    options =['Show Followers (Browser)', 'Show User Profile (Browser)', 'Show User Information', 'Show Tweet(s)', 'Return to User Selection']
     option = pick(options, title)
-    if (option[0] == 'Show Followers'):
+    if (option[0] == 'Show Followers (Browser)'):
         followersEnding = '/followers'
         url = baseUrl + selectedUser + followersEnding
         webbrowser.open(url)
-    elif (option[0] == 'Show User Profile'):
+    elif (option[0] == 'Show User Profile (Browser)'):
         webbrowser.open(baseUrl + selectedUser)
     elif (option[0] == 'Show User Information'):
         tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]
         os.system('clear')
         print(tweets)
         input("Press Enter to return...")
+        os.system('clear')
         userActions(selectedUser)
     elif (option[0] == 'Show Tweet(s)'):
         showTweetText(selectedUser)
-        tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]
-        print(tweets)
-        for i in range(len(tweets)):
-            url = baseUrl + selectedUser + '/status/' + str(tweets.loc[i, 'id'])
-            webbrowser.open(url)
     elif (option[0] == 'Return to User Selection'):
         printTop10Users()
 
 def showTweetText(selectedUser):
-    tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]['text']
+    tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]
+    title = 'Select Tweet to Inspect in Browser'
     options = []
-    for tweet in tweets:
-        parsedTweet = tweet.replace('\n', '\n')
-        options.append((parsedTweet, True))
-    title = 'Tweet(s). Press enter to return to User Actions'
-    pick(options, title)
+    for text in enumerate(tweets['text']):
+        options.append(text)
+    options.append('Return to User Selection')
+    options = pick(options, title)
+    if (options[0] != 'Return to User Selection'):
+        tweetId = tweets['id'].iloc[options[1]]
+        url = 'https://twitter.com/' + selectedUser + '/status/' + str(tweetId)
+        webbrowser.open(url)
     userActions(selectedUser)
-
-
 
 ## Main
 

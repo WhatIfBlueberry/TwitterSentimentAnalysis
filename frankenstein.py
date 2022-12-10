@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from pick import pick
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import webbrowser
 import os
+from tqdm import tqdm
 
 consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
 consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
@@ -46,23 +45,28 @@ def query():
 
 def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
 
+    # Empty DataFrame to store the scrapped tweets
     collectedTweets.drop(collectedTweets.index, axis=0, inplace=True)
-    
+
+    barTweepy = tqdm(total=numberOfTweets, desc='fetching tweets')
+
     # Collecting tweets using tweepy
-    tweets = tweepy.Cursor(client.search_tweets,
+    list_tweets = []
+
+    for tweet in tweepy.Cursor(client.search_tweets,
                                 keyword, lang="en",
                                 tweet_mode='extended',
-                                since_id=sinceDate).items(numberOfTweets)
-
-    # .Cursor() returns an iterable object. Each item in
-    # the iterator has various attributes
-    # that you can access to
-    # get information about each tweet
-    list_tweets = [tweet for tweet in tweets]
+                                since_id=sinceDate).items(numberOfTweets):
+        list_tweets.append(tweet)
+        barTweepy.update(1)
 
     # we will iterate over each tweet in the
     # list for extracting information about each tweet
+
+    barBlob = tqdm(total=numberOfTweets, desc='analyzing tweets')
+
     for tweet in list_tweets:
+        barBlob.update(1)
 
         analysis = TextBlob(tweet.full_text)
         
@@ -91,7 +95,9 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
                     followers, totaltweets,
                     retweetcount, text, hashtext, id, sentiment]
         collectedTweets.loc[len(collectedTweets)] = ith_tweet
-    
+    barTweepy.close()
+    barBlob.close()
+    os.system('clear')
     return collectedTweets
 
 def printSummary():

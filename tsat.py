@@ -1,12 +1,13 @@
 from textblob import TextBlob
-import tweepy
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
+from matplotlib import pyplot as plt
 from pick import pick
+from tqdm import tqdm
+import tweepy
+import plotext
+import pandas as pd
 import webbrowser
 import os
-from tqdm import tqdm
+
 
 consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
 consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
@@ -120,13 +121,6 @@ def printSummary():
         sentimentResult = "Negative"
     elif (polarity > -1 and polarity <= -0.6):
         sentimentResult = "Strongly Negative"
-
-    # Number of Tweets with a positive sentiment
-    print("Positive tweets percentage: {} %".format(100*len(collectedTweets[collectedTweets['sentiment'] > 0]) / len(collectedTweets['sentiment'])))
-    # Number of Tweets with a neutral sentiment
-    print("Neutral tweets percentage: {} %".format(100*len(collectedTweets[collectedTweets['sentiment'] == 0]) / len(collectedTweets['sentiment'])))
-    # Number of Tweets with a negative sentiment
-    print("Negative tweets percentage: {} %".format(100*len(collectedTweets[collectedTweets['sentiment'] < 0]) / len(collectedTweets['sentiment'])))
 
     # print results
     print("Result: People seem to have a", sentimentResult, "opinion on", keyword)

@@ -21,6 +21,7 @@ client = tweepy.API(auth)
 
 def query():
     os.system('clear')
+    global keyword, numberOfTweets, sinceDate
     keyword = input("Enter keyword/hashtag to search about: ")
     numberOfTweets = int(input ("Enter how many tweets to analyze: "))
     sinceDate = input("Enter since date (yyyy-mm-dd): ")
@@ -45,7 +46,6 @@ def query():
 
 def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
 
-    # Creating DataFrame using pandas
     collectedTweets.drop(collectedTweets.index, axis=0, inplace=True)
     
     # Collecting tweets using tweepy
@@ -95,6 +95,7 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
     return collectedTweets
 
 def printSummary():
+    os.system('clear')
     polarity = sum(collectedTweets['sentiment'])/numberOfTweets
     print("How people are reacting on " + keyword + " by analyzing " + str(numberOfTweets) + " Tweets.")
     print("=====================================================================================================")
@@ -125,6 +126,9 @@ def printSummary():
     print("Result: People seem to have a", sentimentResult, "opinion on", keyword)
 
     print("=====================================================================================================")
+    input("Press Enter to continue...")
+    os.system('clear')
+    mainMenu()
 
 def mainMenu():
     title = 'Please choose which Information you want to see: '
@@ -165,7 +169,6 @@ def printTop10Users():
    
 def userActions(selectedUser):
     baseUrl = 'https://twitter.com/'
-    user = client.get_user(screen_name = selectedUser)
     title = 'User: ' + selectedUser + '\nPlease choose what you want to do: '
     options =['Show Followers (Browser)', 'Show User Profile (Browser)', 'Show User Information', 'Show Tweet(s)', 'Return to User Selection']
     option = pick(options, title)

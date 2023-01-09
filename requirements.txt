@@ -1,6 +1,7 @@
 art==5.8
 pandas==1.5.2
 pick==2.2.0
+python-dotenv==0.21.0
 textblob==0.17.1
 tqdm==4.64.1
 tweepy==4.12.1

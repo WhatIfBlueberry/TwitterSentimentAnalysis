@@ -6,16 +6,13 @@ import pandas as pd
 import webbrowser
 import os
 from art import *
+from dotenv import load_dotenv
 
-# Twitter Credentials (should be stored in a separate file, but should be fine for this small project)
-consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
-consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
-access_key = "1035676027-kBiem3UOVUg093irulINLfSIPBg9DKnkWzES0vz"
-access_secret = "sn7yv4tnTGnTQLKPugY2arrnwm8xxIC16k6smLqO7YoA4"
+load_dotenv()
 
 # Tweepy authentication
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_key, access_secret)
+auth = tweepy.OAuthHandler(os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'])
+auth.set_access_token(os.environ['ACCESS_KEY'], os.environ['ACCESS_SECRET'])
 client = tweepy.API(auth)
 
 

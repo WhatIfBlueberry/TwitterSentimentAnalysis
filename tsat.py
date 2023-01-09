@@ -1,19 +1,19 @@
 from textblob import TextBlob
-from matplotlib import pyplot as plt
 from pick import pick
 from tqdm import tqdm
 import tweepy
-import plotext
 import pandas as pd
 import webbrowser
 import os
+from art import *
 
-
+# Twitter Credentials (should be stored in a separate file, but should be fine for this small project)
 consumer_key = "61qV0OFGhRtDH0qnHFDsd35Zh"
 consumer_secret = "sMmlv7QZAKjNURXjSh3lqyRpbJrs0s4ZS3fw5OaCLrKyoBauoT"
 access_key = "1035676027-kBiem3UOVUg093irulINLfSIPBg9DKnkWzES0vz"
 access_secret = "sn7yv4tnTGnTQLKPugY2arrnwm8xxIC16k6smLqO7YoA4"
 
+# Tweepy authentication
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_key, access_secret)
 client = tweepy.API(auth)
@@ -21,9 +21,10 @@ client = tweepy.API(auth)
 
 def query():
     os.system('clear')
+    tprint("TSAT")
     global keyword, numberOfTweets, sinceDate
     keyword = input("Enter keyword/hashtag to search about: ")
-    numberOfTweets = int(input ("Enter how many tweets to analyze: "))
+    numberOfTweets = int(input("Enter how many tweets to analyze: "))
     sinceDate = input("Enter since date (yyyy-mm-dd): ")
 
     global collectedTweets
@@ -43,12 +44,15 @@ def query():
 
     mainMenu()
 
+# scrapes and analyzes tweets using Tweepy and TextBlob
+
 
 def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
 
-    # Empty DataFrame to store the scrapped tweets
+    # Empty DataFrame to store the scraped tweets
     collectedTweets.drop(collectedTweets.index, axis=0, inplace=True)
 
+    # loading bar
     barTweepy = tqdm(total=numberOfTweets, desc='fetching tweets')
 
     # Collecting tweets using tweepy
@@ -69,8 +73,9 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
     for tweet in list_tweets:
         barBlob.update(1)
 
+        # sentiment analysis with TextBlob
         analysis = TextBlob(tweet.full_text)
-        
+
         username = tweet.user.screen_name
         description = tweet.user.description
         location = tweet.user.location
@@ -90,7 +95,6 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
         for j in range(0, len(hashtags)):
                 hashtext.append(hashtags[j]['text'])
 
-
         ith_tweet = [username, description,
                     location, following,
                     followers, totaltweets,
@@ -101,14 +105,35 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
     os.system('clear')
     return collectedTweets
 
+
 def printSummary():
     os.system('clear')
     polarity = sum(collectedTweets['sentiment'])/numberOfTweets
-    print("How people are reacting on " + keyword + " by analyzing " + str(numberOfTweets) + " Tweets.")
+    positiveTweets = collectedTweets[collectedTweets['sentiment'] > 0]
+    negativeTweets = collectedTweets[collectedTweets['sentiment'] < 0]
+    neutralTweets = collectedTweets[collectedTweets['sentiment'] == 0]
+
+    print("How people are reacting on " + keyword +
+          " by analyzing " + str(numberOfTweets) + " Tweets.")
     print("=====================================================================================================")
+
+    print("Positive Tweets: ", positiveTweets.shape[0])
+    print("Negative Tweets: ", negativeTweets.shape[0])
+    print("Neutral Tweets: ", neutralTweets.shape[0])
+    print("Result: People seem to have a",
+          sentimentInHumanLanguage(polarity), "opinion on", keyword)
+
+    print("=====================================================================================================")
+
+    input("Press Enter to continue...")
+    os.system('clear')
+    mainMenu()
+
+
+def sentimentInHumanLanguage(polarity):
     sentimentResult = ""
     if (polarity == 0):
-        sentimentResult = "Neutral"
+            sentimentResult = "Neutral"
     elif (polarity > 0 and polarity <= 0.3):
         sentimentResult = "Weakly Positive"
     elif (polarity > 0.3 and polarity <= 0.6):
@@ -121,14 +146,7 @@ def printSummary():
         sentimentResult = "Negative"
     elif (polarity > -1 and polarity <= -0.6):
         sentimentResult = "Strongly Negative"
-
-    # print results
-    print("Result: People seem to have a", sentimentResult, "opinion on", keyword)
-
-    print("=====================================================================================================")
-    input("Press Enter to continue...")
-    os.system('clear')
-    mainMenu()
+    return sentimentResult
 
 def mainMenu():
     title = 'Please choose which Information you want to see: '
@@ -154,19 +172,23 @@ def printTop10Hashtags():
     os.system('clear')
     mainMenu()
 
-def printTop10Users():
+def printTop10Users(numUsers=10):
     title = 'Select User to Inspect'
     options = []
-    topUser = collectedTweets['username'].value_counts()[:10]
+    topUser = collectedTweets['username'].value_counts()[:numUsers]
     for idx,name in enumerate(topUser.index.tolist()):
         offset = 20 - len(name)
         spaces = ' ' * offset
         string = 'Name: ' + name + spaces + 'Counts: ' + str(topUser[idx])
         options.append(string)
+    if (numUsers < len(collectedTweets['username'].value_counts())):
+        options.append('Show me more!')
     options.append('Return to Main Menu')
     option = pick(options, title)
     if (option[0] == 'Return to Main Menu'):
         mainMenu()
+    if (option[0] == 'Show me more!'):
+        printTop10Users(numUsers + 10)
     selectedUser = topUser.index.tolist()[option[1]]
     userActions(selectedUser)
    
@@ -181,20 +203,20 @@ def userActions(selectedUser):
         webbrowser.open(url)
         os.system('clear')
         userActions(selectedUser)
-    elif (option[0] == 'Show User Profile (Browser)'):
+    if (option[0] == 'Show User Profile (Browser)'):
         webbrowser.open(baseUrl + selectedUser)
         os.system('clear')
         userActions(selectedUser)
-    elif (option[0] == 'Show User Information'):
+    if (option[0] == 'Show User Information'):
         tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]
         os.system('clear')
         print(tweets)
         input("Press Enter to return...")
         os.system('clear')
         userActions(selectedUser)
-    elif (option[0] == 'Show Tweet(s)'):
+    if (option[0] == 'Show Tweet(s)'):
         showTweetText(selectedUser)
-    elif (option[0] == 'Return to User Selection'):
+    if (option[0] == 'Return to User Selection'):
         printTop10Users()
 
 def showTweetText(selectedUser):
@@ -212,6 +234,6 @@ def showTweetText(selectedUser):
         os.system('clear')
     userActions(selectedUser)
 
-## Main
+## Main - start of the program
 
 query()

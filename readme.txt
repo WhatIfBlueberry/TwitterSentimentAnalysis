@@ -7,7 +7,10 @@ Inside this folder you'll find a 'requirements.txt' file, which contains librari
 You should be able to install all of them at once with the following bash command: 'pip install -r requirements.txt' 
 (make sure you navigate to this folder first, or provide full path before 'requirements.txt')
 
-2) Using Tsat
+2) If you are installing from GitHub, make sure to create an .env file with the required Tokens, which can be aquired from your Twitter dev account.
+Elevated access is required.
+
+3) Using Tsat
 Tsat offers a terminal based UI, which is easy to use and should be straight forward. To start execute the 'tsat.py' file the way you prefer.
 Example: Open Bash in this folder and type 'python3 tsat.py'
 
@@ -44,7 +47,7 @@ All following menus should be self explanatory and will not be explained in deta
  - Enter new Query and start over
  - Also: All fetched Tweets are stored in 'tweets.csv' automatically
 
-3) Questions
+4) Questions
 If you have any question reach out to me at dylan.rau@st.oth-regensburg.de
 
 Have a nice day!

@@ -13,9 +13,11 @@ load_dotenv()
 # Tweepy authentication
 auth = tweepy.OAuthHandler(os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'])
 auth.set_access_token(os.environ['ACCESS_KEY'], os.environ['ACCESS_SECRET'])
-client = tweepy.API(auth, wait_on_rate_limit=True)
+api = tweepy.API(auth, wait_on_rate_limit=True)
 
-
+# This function prompts the user for a keyword, number of tweets, and start date for a Twitter search. 
+# It then calls the \texttt{scrape} function to collect tweets and perform sentiment analysis on them using TextBlob. 
+# The resulting data is saved to a CSV file and the main menu is displayed.
 def query():
     os.system('clear')
     tprint("TSAT")
@@ -42,8 +44,6 @@ def query():
     mainMenu()
 
 # scrapes and analyzes tweets using Tweepy and TextBlob
-
-
 def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
 
     # Empty DataFrame to store the scraped tweets
@@ -55,7 +55,7 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
     # Collecting tweets using tweepy
     list_tweets = []
 
-    tweets = tweepy.Cursor(client.search_tweets,
+    tweets = tweepy.Cursor(api.search_tweets,
                                 keyword, lang="en",
                                 tweet_mode='extended',
                                 since_id=sinceDate).items(numberOfTweets)
@@ -66,6 +66,7 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
     # we will iterate over each tweet in the
     # list for extracting information about each tweet
 
+    # loading bar
     barBlob = tqdm(total=numberOfTweets, desc='analyzing tweets')
 
     for tweet in list_tweets:
@@ -113,7 +114,7 @@ def printSummary():
 
     print("How people are reacting on " + keyword +
           " by analyzing " + str(numberOfTweets) + " Tweets.")
-    print("=====================================================================================================")
+    print("=" * 70)
 
     print("Positive Tweets: ", positiveTweets.shape[0])
     print("Negative Tweets: ", negativeTweets.shape[0])
@@ -121,7 +122,7 @@ def printSummary():
     print("Result: People seem to have a",
           sentimentInHumanLanguage(polarity), "opinion on", keyword)
 
-    print("=====================================================================================================")
+    print("=" * 70)
 
     input("Press Enter to continue...")
     os.system('clear')
@@ -191,8 +192,10 @@ def printTop10Users(numUsers=10):
 def userActions(selectedUser):
     baseUrl = 'https://twitter.com/'
     title = 'User: ' + selectedUser + '\nPlease choose what you want to do: '
-    options =['Show Followers (Browser)', 'Show User Profile (Browser)', 'Show User Information', 'Show Tweet(s)', 'Return to User Selection']
+    options =['Show Follower (TSAT)', 'Show Follower (Browser)', 'Show User Profile (Browser)', 'Show User Information', 'Show Tweet(s)', 'Return to User Selection']
     option = pick(options, title)
+    if (option[0] == 'Show Follower (TSAT)'):
+        displayFollower(selectedUser);
     if (option[0] == 'Show Followers (Browser)'):
         followersEnding = '/followers'
         url = baseUrl + selectedUser + followersEnding
@@ -214,6 +217,21 @@ def userActions(selectedUser):
         showTweetText(selectedUser)
     if (option[0] == 'Return to User Selection'):
         printTop10Users()
+
+def displayFollower(selectedUser):
+    options = []
+    barfollower = tqdm(total=20, desc='fetching tweets')
+    title = "List of 20 Followers of " + selectedUser + ":"
+    followers = api.get_followers(screen_name=selectedUser)
+    for follower in followers:
+        options.append(follower.screen_name)
+        barfollower.update(1)
+    barfollower.close()
+    options.append('Return to Main Menu')
+    option = pick(options, title)
+    if (option[0] == 'Return to User Actions'):
+        userActions(selectedUser)
+    userActions(option[0])
 
 def showTweetText(selectedUser):
     tweets = collectedTweets.loc[collectedTweets['username'] == selectedUser]

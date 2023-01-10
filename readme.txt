@@ -39,6 +39,7 @@ Navigate using the arrow keys, confirm with enter.
 All following menus should be self explanatory and will not be explained in detail, here is a list of what tsat is capable of:
  - List most frequently used hashtags in the fetched dataset
  - Show Users with most Tweets in the Dataset. (10 is default, can be increased by clicking on 'Show me more!') For each User you can:
+	- Fetch Follower (TSAT)
 	- Show User Follower (Browser)
 	- Show User Profile (Browser)
 	- Show User Information (Name, description, location, hashtags, id, sentiment ..)

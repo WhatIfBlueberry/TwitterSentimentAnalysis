@@ -1,7 +1,7 @@
 from textblob import TextBlob
+import tweepy
 from pick import pick
 from tqdm import tqdm
-import tweepy
 import pandas as pd
 import webbrowser
 import os
@@ -13,7 +13,7 @@ load_dotenv()
 # Tweepy authentication
 auth = tweepy.OAuthHandler(os.environ['CONSUMER_KEY'], os.environ['CONSUMER_SECRET'])
 auth.set_access_token(os.environ['ACCESS_KEY'], os.environ['ACCESS_SECRET'])
-client = tweepy.API(auth)
+client = tweepy.API(auth, wait_on_rate_limit=True)
 
 
 def query():
@@ -55,10 +55,11 @@ def scrape(keyword, numberOfTweets, sinceDate='2022-01-01'):
     # Collecting tweets using tweepy
     list_tweets = []
 
-    for tweet in tweepy.Cursor(client.search_tweets,
+    tweets = tweepy.Cursor(client.search_tweets,
                                 keyword, lang="en",
                                 tweet_mode='extended',
-                                since_id=sinceDate).items(numberOfTweets):
+                                since_id=sinceDate).items(numberOfTweets)
+    for tweet in tweets:
         list_tweets.append(tweet)
         barTweepy.update(1)
 
@@ -128,22 +129,20 @@ def printSummary():
 
 
 def sentimentInHumanLanguage(polarity):
-    sentimentResult = ""
     if (polarity == 0):
-            sentimentResult = "Neutral"
-    elif (polarity > 0 and polarity <= 0.3):
-        sentimentResult = "Weakly Positive"
-    elif (polarity > 0.3 and polarity <= 0.6):
-        sentimentResult = "Positive"
-    elif (polarity > 0.6 and polarity <= 1):
-        sentimentResult = "Strongly Positive"
-    elif (polarity > -0.3 and polarity <= 0):
-        sentimentResult = "Weakly Negative"
-    elif (polarity > -0.6 and polarity <= -0.3):
-        sentimentResult = "Negative"
-    elif (polarity > -1 and polarity <= -0.6):
-        sentimentResult = "Strongly Negative"
-    return sentimentResult
+        return "Neutral"
+    if (polarity > 0 and polarity <= 0.3):
+        return "Weakly Positive"
+    if (polarity > 0.3 and polarity <= 0.6):
+        return "Positive"
+    if (polarity > 0.6 and polarity <= 1):
+        return "Strongly Positive"
+    if (polarity > -0.3 and polarity <= 0):
+        return "Weakly Negative"
+    if (polarity > -0.6 and polarity <= -0.3):
+        return "Negative"
+    if (polarity > -1 and polarity <= -0.6):
+        return "Strongly Negative"
 
 def mainMenu():
     title = 'Please choose which Information you want to see: '
@@ -152,13 +151,13 @@ def mainMenu():
 
     if (option[0] == 'Top 10 most frequent hashtags'):
         printTop10Hashtags()
-    elif (option[0] == 'Top 10 Users with most Tweets'):
+    if (option[0] == 'Top 10 Users with most Tweets'):
         printTop10Users()
-    elif (option[0] == 'Summary'):
+    if (option[0] == 'Summary'):
         printSummary()
-    elif (option[0] == 'Enter new Query'):
+    if (option[0] == 'Enter new Query'):
         query()
-    elif (option[0] == 'Exit'):
+    if (option[0] == 'Exit'):
         print("Goodbye!")
         exit();
 
